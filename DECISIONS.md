@@ -245,6 +245,20 @@ speculated on in the abstract.
 An ambiguity noticed and deferred is engineering. An ambiguity chased to zero
 before any code exists is not.
 
+### Known limitation: additive changes resolve to INCONCLUSIVE
+
+VerifierLock is strongest for changes that *modify existing behaviour*. Purely
+additive changes — a new function plus a new test for it — cannot be probed by
+P2. The new test imports a symbol that does not exist in base source, so P2
+fails at collection and the run resolves to INCONCLUSIVE (ENV_INCOMPATIBLE /
+IMPORT_LIMITATION) rather than INDEPENDENT_EVIDENCE.
+
+This is inherent to the inversion method: the base revision is the reference
+implementation, and a test for code that does not yet exist in base has nothing
+to run against. It is disclosed rather than hidden. The tool's detection power
+is concentrated where it matters most — on changes to behaviour that already
+had, or should have, test coverage.
+
 ---
 
 ## 9. Requirements process
