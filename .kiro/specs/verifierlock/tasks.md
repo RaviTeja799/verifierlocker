@@ -25,14 +25,14 @@ implementation sub-tasks are never optional.
 
 ## Tasks
 
-- [ ] 1. Project scaffold and exact pytest exit-code interpretation
-  - [ ] 1.1 Scaffold the package, shared types, and test framework
+- [~] 1. Project scaffold and exact pytest exit-code interpretation
+  - [x] 1.1 Scaffold the package, shared types, and test framework
     - Create the `verifierlock` package layout, `pyproject.toml`, and a
       `tests/` tree; add Hypothesis and pytest as dev dependencies.
     - Define shared frozen types/enums used across stages: `ProbeOutcome`
       (`ALL_PASSED`, `TESTS_FAILED`, `INCONCLUSIVE`) and reason-code constants.
     - _Requirements: 11.1_
-  - [ ] 1.2 Implement the pure `interpret_exit_code` function FIRST
+  - [x] 1.2 Implement the pure `interpret_exit_code` function FIRST
     - Map pytest exit codes to outcomes: 0 -> ALL_PASSED (the only pass);
       1 -> TESTS_FAILED; 3, 4 -> INCONCLUSIVE (cite code); 5 -> INCONCLUSIVE
       (zero collected); 6 -> INCONCLUSIVE (max-warnings); 2 -> abort signal;
@@ -40,7 +40,7 @@ implementation sub-tasks are never optional.
     - Return exactly one `(ProbeOutcome, reason)` per code; no engine, worktree,
       or orchestration code yet.
     - _Requirements: 8.1, 8.2, 8.3, 8.5, 8.6, 8.7_
-  - [ ]* 1.3 Write property test for exit-code interpretation
+  - [x] 1.3 Write property test for exit-code interpretation (tests/test_exit_code_properties.py)
     - **Property 1: Exit-code interpretation is exact and total**
     - Assert pytest exit codes 3, 4, 5, and 6 NEVER classify as passed, and
       that ONLY exit code 0 classifies as all-passed.
