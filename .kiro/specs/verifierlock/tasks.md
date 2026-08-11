@@ -83,13 +83,13 @@ implementation sub-tasks are never optional.
     - **Property 7: Test and verifier-config classification rules**
     - **Validates: Requirements 4b.2, 4b.3, 4b.4**
 
-- [ ] 5. Implement the Coverage_Analyzer mapping (pure)
-  - [ ] 5.1 Implement `map_coverage` over Cobertura XML and changed head lines
+- [x] 5. Implement the Coverage_Analyzer mapping (pure)
+  - [x] 5.1 Implement `map_coverage` over Cobertura XML and changed head lines
     - Parse covered lines from P1 Cobertura XML and intersect with changed
       head-revision production lines; mark each changed line covered/uncovered
       and record uncovered locations; set `available=False` when undeterminable.
     - _Requirements: 9.2, 9.3, 9.4_
-  - [ ]* 5.2 Write property test for coverage mapping
+  - [x] 5.2 Write property test for coverage mapping
     - **Property 8: Coverage mapping equals the intersection with changed lines**
     - **Validates: Requirements 9.2, 9.3**
 

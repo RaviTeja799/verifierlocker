@@ -7,6 +7,10 @@
     "4.3 Write property test for test/verifier-config classification rules": {
       "status": "passed",
       "lastRunTimestamp": 1786419982204
+    },
+    "5.2 Write property test for coverage mapping": {
+      "status": "passed",
+      "lastRunTimestamp": 1786492800000
     }
   },
   "executionHistory": {
