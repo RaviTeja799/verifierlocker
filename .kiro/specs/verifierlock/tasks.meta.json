@@ -1,5 +1,14 @@
 {
-  "pbtResults": {},
+  "pbtResults": {
+    "4.2 Write property test for classification partition": {
+      "status": "passed",
+      "lastRunTimestamp": 1786419977711
+    },
+    "4.3 Write property test for test/verifier-config classification rules": {
+      "status": "passed",
+      "lastRunTimestamp": 1786419982204
+    }
+  },
   "executionHistory": {
     "1.1 Scaffold the package, shared types, and test framework": [
       {
@@ -49,6 +58,42 @@
         "executionId": "fc2d5c7e-0bc6-4625-abc7-33ac2c2b8ea0",
         "chatSessionId": "sess_d3bfc03f-5013-444e-a7d6-ce98932b3f29",
         "timestamp": 1786418869064
+      },
+      {
+        "executionId": "fc2d5c7e-0bc6-4625-abc7-33ac2c2b8ea0",
+        "chatSessionId": "sess_d3bfc03f-5013-444e-a7d6-ce98932b3f29",
+        "timestamp": 1786420009152
+      }
+    ],
+    "4.2 Write property test for classification partition": [
+      {
+        "executionId": "fc2d5c7e-0bc6-4625-abc7-33ac2c2b8ea0",
+        "chatSessionId": "sess_d3bfc03f-5013-444e-a7d6-ce98932b3f29",
+        "timestamp": 1786420029175
+      },
+      {
+        "executionId": "fc2d5c7e-0bc6-4625-abc7-33ac2c2b8ea0",
+        "chatSessionId": "sess_d3bfc03f-5013-444e-a7d6-ce98932b3f29",
+        "timestamp": 1786420036723
+      }
+    ],
+    "4.3 Write property test for test/verifier-config classification rules": [
+      {
+        "executionId": "fc2d5c7e-0bc6-4625-abc7-33ac2c2b8ea0",
+        "chatSessionId": "sess_d3bfc03f-5013-444e-a7d6-ce98932b3f29",
+        "timestamp": 1786420029706
+      },
+      {
+        "executionId": "fc2d5c7e-0bc6-4625-abc7-33ac2c2b8ea0",
+        "chatSessionId": "sess_d3bfc03f-5013-444e-a7d6-ce98932b3f29",
+        "timestamp": 1786420037538
+      }
+    ],
+    "4. Implement the File_Classifier (pure)": [
+      {
+        "executionId": "fc2d5c7e-0bc6-4625-abc7-33ac2c2b8ea0",
+        "chatSessionId": "sess_d3bfc03f-5013-444e-a7d6-ce98932b3f29",
+        "timestamp": 1786420037645
       }
     ]
   }

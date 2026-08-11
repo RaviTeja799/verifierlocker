@@ -68,18 +68,18 @@ implementation sub-tasks are never optional.
 - [x] 3. Checkpoint - Ensure the walking skeleton runs and emits an artifact
   - Ensure all tests pass, ask the user if questions arise.
 
-- [~] 4. Implement the File_Classifier (pure)
-  - [-] 4.1 Implement `classify` over a diff and pytest configuration
+- [x] 4. Implement the File_Classifier (pure)
+  - [x] 4.1 Implement `classify` over a diff and pytest configuration
     - Classify every changed file as production / test / verifier configuration,
       using declared `testpaths` when present, else pytest default discovery
       patterns and `conftest.py`; classify CI-workflow, coverage, pytest, lint,
       and type-check config as verifier configuration; collect unclassifiable
       paths.
     - _Requirements: 4b.1, 4b.2, 4b.3, 4b.4, 4b.6_
-  - [ ] 4.2 Write property test for classification partition
+  - [x] 4.2 Write property test for classification partition
     - **Property 6: File classification is a total partition**
     - **Validates: Requirements 4b.1, 4b.6**
-  - [ ] 4.3 Write property test for test/verifier-config classification rules
+  - [x] 4.3 Write property test for test/verifier-config classification rules
     - **Property 7: Test and verifier-config classification rules**
     - **Validates: Requirements 4b.2, 4b.3, 4b.4**
 

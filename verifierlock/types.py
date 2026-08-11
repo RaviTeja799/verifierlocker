@@ -4,9 +4,10 @@ engine stages.
 These types are intentionally minimal at this stage of the build (Task 1.1):
 they define the shapes that later stages (exit-code interpretation, probe
 running, verdict deciding, evidence recording) will consume and produce.
-Only `ProbeOutcome` and `ProbeResult` are defined here per the design's
-Probe_Runner and Exit_Code_Interpreter section; other components' types
-(ClassificationResult, VerdictInputs, etc.) are introduced in their own
+`ProbeOutcome` and `ProbeResult` are defined here per the design's
+Probe_Runner and Exit_Code_Interpreter section; `Diff` is added in Task 4.1
+as the minimal shared input type consumed by `File_Classifier.classify`.
+Other components' types (VerdictInputs, etc.) are introduced in their own
 tasks.
 """
 
@@ -26,6 +27,19 @@ class ProbeOutcome(Enum):
     ALL_PASSED = "all_passed"
     TESTS_FAILED = "tests_failed"
     INCONCLUSIVE = "inconclusive"
+
+
+@dataclass(frozen=True)
+class Diff:
+    """The set of file paths changed between a base and head revision.
+
+    Minimal for now: `File_Classifier.classify` (Task 4.1) only needs the
+    changed paths. `Static_Analyzer.analyze` (Task 11) will later need
+    hunk-level detail; extending this type then is expected and will not
+    change `classify`'s contract, which only reads `changed_paths`.
+    """
+
+    changed_paths: tuple[str, ...]
 
 
 @dataclass(frozen=True)
