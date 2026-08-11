@@ -46,40 +46,40 @@ implementation sub-tasks are never optional.
       that ONLY exit code 0 classifies as all-passed.
     - **Validates: Requirements 8.1, 8.2, 8.3, 8.5, 8.6, 8.7**
 
-- [ ] 2. Walking skeleton: real worktrees, one probe, one evidence artifact
-  - [ ] 2.1 Implement the Worktree_Manager path scheme and create two worktrees
+- [x] 2. Walking skeleton: real worktrees, one probe, one evidence artifact
+  - [x] 2.1 Implement the Worktree_Manager path scheme and create two worktrees
     - Implement the per-run path scheme
       `<system-temp>/verifierlock/<run-id>/worktrees/<slot>/` and create two
       detached worktrees (base, head) via `git worktree add --detach` (never
       `--force`).
     - _Requirements: 3.1, 3.4_
-  - [ ] 2.2 Run ONE real pytest probe in one worktree and capture the result
+  - [x] 2.2 Run ONE real pytest probe in one worktree and capture the result
     - Launch a single real pytest process in one worktree; capture the exact
       command and the process exit code, and classify it via
       `interpret_exit_code` from Task 1.
     - No four-probe matrix, no verdict engine, no coverage.
     - _Requirements: 6.4_
-  - [ ] 2.3 Emit ONE Evidence Record JSON artifact to disk
+  - [x] 2.3 Emit ONE Evidence Record JSON artifact to disk
     - Assemble a minimal Evidence Record (base/head commits, the single probe's
       command, exit code, and outcome) and write it as JSON to disk so the
       skeleton runs end-to-end and produces a real artifact.
     - _Requirements: 11.1, 11.2_
 
-- [ ] 3. Checkpoint - Ensure the walking skeleton runs and emits an artifact
+- [x] 3. Checkpoint - Ensure the walking skeleton runs and emits an artifact
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 4. Implement the File_Classifier (pure)
-  - [ ] 4.1 Implement `classify` over a diff and pytest configuration
+- [~] 4. Implement the File_Classifier (pure)
+  - [-] 4.1 Implement `classify` over a diff and pytest configuration
     - Classify every changed file as production / test / verifier configuration,
       using declared `testpaths` when present, else pytest default discovery
       patterns and `conftest.py`; classify CI-workflow, coverage, pytest, lint,
       and type-check config as verifier configuration; collect unclassifiable
       paths.
     - _Requirements: 4b.1, 4b.2, 4b.3, 4b.4, 4b.6_
-  - [ ]* 4.2 Write property test for classification partition
+  - [ ] 4.2 Write property test for classification partition
     - **Property 6: File classification is a total partition**
     - **Validates: Requirements 4b.1, 4b.6**
-  - [ ]* 4.3 Write property test for test/verifier-config classification rules
+  - [ ] 4.3 Write property test for test/verifier-config classification rules
     - **Property 7: Test and verifier-config classification rules**
     - **Validates: Requirements 4b.2, 4b.3, 4b.4**
 

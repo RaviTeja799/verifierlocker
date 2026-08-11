@@ -31,6 +31,25 @@
         "chatSessionId": "sess_d208cda2-b7b7-47de-92fb-70b40996dae2",
         "timestamp": 1786281986198
       }
+    ],
+    "3. Checkpoint - Ensure the walking skeleton runs and emits an artifact": [
+      {
+        "executionId": "b43d0623-9305-4bf9-b271-b59f3a1158f8",
+        "chatSessionId": "sess_aec818b8-e2df-4466-8cbf-87f943825562",
+        "timestamp": 1786398079551
+      },
+      {
+        "executionId": "b43d0623-9305-4bf9-b271-b59f3a1158f8",
+        "chatSessionId": "sess_aec818b8-e2df-4466-8cbf-87f943825562",
+        "timestamp": 1786398117257
+      }
+    ],
+    "4.1 Implement `classify` over a diff and pytest configuration": [
+      {
+        "executionId": "fc2d5c7e-0bc6-4625-abc7-33ac2c2b8ea0",
+        "chatSessionId": "sess_d3bfc03f-5013-444e-a7d6-ce98932b3f29",
+        "timestamp": 1786418869064
+      }
     ]
   }
 }
