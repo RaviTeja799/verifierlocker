@@ -117,23 +117,23 @@ implementation sub-tasks are never optional.
     - **Property 19: Baseline nondeterminism is detected from repeated P0**
     - **Validates: Requirements 8c.1, 8c.2**
 
-- [ ] 7. Checkpoint - Ensure all pure-engine property tests pass
+- [x] 7. Checkpoint - Ensure all pure-engine property tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 8. Complete the Worktree_Manager lifecycle
-  - [ ] 8.1 Implement create / remove_all / prune_stale with crash-safe cleanup
+- [x] 8. Complete the Worktree_Manager lifecycle
+  - [x] 8.1 Implement create / remove_all / prune_stale with crash-safe cleanup
     - Implement per-slot unique paths (P0 repetitions, P1, P2, P3), start-of-run
       stale-metadata pruning, and removal of all created worktrees on any
       termination via context manager / `finally` / signal handlers, then
       `git worktree prune`.
     - _Requirements: 3.1, 3.2, 3.3, 3.5, 3.6, 8c.3_
-  - [ ]* 8.2 Write property test for worktree path uniqueness
+  - [x] 8.2 Write property test for worktree path uniqueness
     - **Property 12: Worktree paths are pairwise unique per run**
     - **Validates: Requirements 3.1, 8c.3**
-  - [ ]* 8.3 Write property test for cleanup on termination
+  - [x] 8.3 Write property test for cleanup on termination
     - **Property 13: All created worktrees are removed on any termination**
     - **Validates: Requirements 3.2, 3.5**
-  - [ ]* 8.4 Write property test for worktree-creation failure handling
+  - [x] 8.4 Write property test for worktree-creation failure handling
     - **Property 14: Worktree-creation failure makes dependent probes INCONCLUSIVE**
     - **Validates: Requirements 3.3**
 

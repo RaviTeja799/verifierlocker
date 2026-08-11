@@ -55,11 +55,14 @@ def run_walking_skeleton(
     base_commit = _rev_parse(repo, base_ref)
     head_commit = _rev_parse(repo, head_ref)
 
-    manager = Worktree_Manager(repo=repo, run_id=run_id)
-    manager.create("base", base_commit)
-    head_handle = manager.create("head", head_commit)
-
-    probe_result = run_probe(head_handle.path, probe_id="P1")
+    # The context manager guarantees the created worktrees are removed on any
+    # exit (normal, exception, or signal) per Task 8 (Req 3.2, 3.5). The
+    # Evidence Record is written under the run directory but OUTSIDE the
+    # `worktrees/` subtree, so cleanup leaves it intact.
+    with Worktree_Manager(repo=repo, run_id=run_id) as manager:
+        manager.create("base", base_commit)
+        head_handle = manager.create("head", head_commit)
+        probe_result = run_probe(head_handle.path, probe_id="P1")
 
     record = build_evidence_record(base_commit, head_commit, probe_result)
     evidence_path = Path(tempfile.gettempdir()) / "verifierlock" / run_id / "evidence.json"
