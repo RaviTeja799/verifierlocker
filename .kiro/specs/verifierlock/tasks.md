@@ -137,19 +137,19 @@ implementation sub-tasks are never optional.
     - **Property 14: Worktree-creation failure makes dependent probes INCONCLUSIVE**
     - **Validates: Requirements 3.3**
 
-- [ ] 9. Implement Revision_Resolver and Repository_Validator
-  - [ ] 9.1 Implement `resolve` for base/head references
+- [x] 9. Implement Revision_Resolver and Repository_Validator
+  - [x] 9.1 Implement `resolve` for base/head references
     - `git rev-parse` each ref to a full commit hash; record hashes and per-ref
       resolution errors used by verdict rows 0a/0b.
     - _Requirements: 1.1, 1.2, 1.5_
-  - [ ]* 9.2 Write unit tests for revision resolution
+  - [x] 9.2 Write unit tests for revision resolution
     - Branch, tag, short-hash, and invalid refs.
     - _Requirements: 1.2, 1.5_
-  - [ ] 9.3 Implement `validate` for the repository
+  - [x] 9.3 Implement `validate` for the repository
     - Confirm the path is a Git repo and reject submodules before any probe;
       record the determination.
     - _Requirements: 2.1, 2.2, 2.3, 2.4_
-  - [ ]* 9.4 Write unit tests for repository validation
+  - [x] 9.4 Write unit tests for repository validation
     - Valid repo, non-repo, and submodule fixture.
     - _Requirements: 2.1, 2.4_
 
