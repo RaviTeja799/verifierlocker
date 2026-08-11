@@ -93,27 +93,27 @@ implementation sub-tasks are never optional.
     - **Property 8: Coverage mapping equals the intersection with changed lines**
     - **Validates: Requirements 9.2, 9.3**
 
-- [ ] 6. Implement the Verdict_Engine (pure) - must pass before any CLI wiring
-  - [ ] 6.1 Implement `decide` with the full first-match rule ordering
+- [x] 6. Implement the Verdict_Engine (pure) - must pass before any CLI wiring
+  - [x] 6.1 Implement `decide` with the full first-match rule ordering
     - Implement the total, pure rule ordering (rows 0a-11): pre-probe
       short-circuits, BASELINE_INVALID on P0 not-green or nondeterministic,
       INCONCLUSIVE on P1 not-green, structural NO_VERIFIER_CHANGE /
       VERIFIER_CHANGED_REVIEW_REQUIRED, aggregated required-probe INCONCLUSIVE,
       then the P2xP3xcoverage matrix; also implement the probe-selection helper.
     - _Requirements: 1.3, 1.4, 2.2, 2.3, 4b.5, 8b.1, 8b.2, 8c.2, 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.7, 10.8, 10.9, 10.10, 10.11, 10.12, 10.13, 10.14, 10.15, 10.16, 13.1_
-  - [ ]* 6.2 Write property test for single deterministic verdict
+  - [x] 6.2 Write property test for single deterministic verdict
     - **Property 2: Exactly one verdict, deterministically**
     - **Validates: Requirements 10.1, 10.16**
-  - [ ]* 6.3 Write property test for rule ordering
+  - [x] 6.3 Write property test for rule ordering
     - **Property 3: Verdict rule ordering matches the specification**
     - **Validates: Requirements 1.3, 1.4, 2.2, 2.3, 4b.5, 8b.1, 8b.2, 8c.2, 10.2, 10.3, 10.4, 10.5, 10.6, 10.7, 10.8, 10.9, 10.10, 10.11, 10.12**
-  - [ ]* 6.4 Write property test for VERIFIER_WEAKENED precondition
+  - [x] 6.4 Write property test for VERIFIER_WEAKENED precondition
     - **Property 4: VERIFIER_WEAKENED requires P2 all-passed**
     - **Validates: Requirements 10.13, 5.6**
-  - [ ]* 6.5 Write property test for probe selection
+  - [x] 6.5 Write property test for probe selection
     - **Property 5: Probe selection follows classification**
     - **Validates: Requirements 6.1, 10.14, 10.15**
-  - [ ]* 6.6 Write property test for baseline nondeterminism
+  - [x] 6.6 Write property test for baseline nondeterminism
     - **Property 19: Baseline nondeterminism is detected from repeated P0**
     - **Validates: Requirements 8c.1, 8c.2**
 

@@ -63,3 +63,21 @@ ABORT_SIGNAL = "ABORT_SIGNAL"  # pytest exit 2
 P2_PASS_P3_FAIL = "P2_PASS_P3_FAIL"
 P2_FAIL_P3_FAIL = "P2_FAIL_P3_FAIL"
 P2_FAIL_P3_PASS = "P2_FAIL_P3_PASS"
+
+# --- Verdict engine structural / matrix reason codes (Req 10, Task 6) ---
+# Consumed by `Verdict_Engine.decide` (Task 6.1) as the `reason_code` for the
+# rows that do not already have a dedicated reason above.
+#
+# Structural rows 3 and 4:
+NO_TEST_OR_VERIFIER_CHANGE = "NO_TEST_OR_VERIFIER_CHANGE"  # row 3 -> NO_VERIFIER_CHANGE
+NO_PRODUCTION_CHANGE = "NO_PRODUCTION_CHANGE"              # row 4 -> VERIFIER_CHANGED_REVIEW_REQUIRED
+# Aggregated required-probe INCONCLUSIVE (row 5, Req 10.6):
+REQUIRED_PROBE_INCONCLUSIVE = "REQUIRED_PROBE_INCONCLUSIVE"
+# Coverage matrix outcomes (rows 9, 10, Req 10.10, 10.11):
+ALL_CHANGED_LINES_COVERED = "ALL_CHANGED_LINES_COVERED"   # row 9 -> INDEPENDENT_EVIDENCE
+CHANGED_LINES_UNCOVERED = "CHANGED_LINES_UNCOVERED"       # row 10 -> NO_INDEPENDENT_EVIDENCE
+# Baseline could not be *assessed* (an INCONCLUSIVE P0 repetition, e.g. a
+# timeout or DEPS_UNDISCOVERABLE base env): the run is INCONCLUSIVE, NOT
+# BASELINE_INVALID, because the baseline was never validly assessed (design
+# Error Handling "assess vs unstable" distinction / decision log 4.7).
+BASELINE_NOT_ASSESSED = "BASELINE_NOT_ASSESSED"
