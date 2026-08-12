@@ -153,35 +153,35 @@ implementation sub-tasks are never optional.
     - Valid repo, non-repo, and submodule fixture.
     - _Requirements: 2.1, 2.4_
 
-- [ ] 10. Implement the Probe_Runner core (P0/P1) with determinism controls
-  - [ ] 10.1 Implement the shared command-composition function
+- [x] 10. Implement the Probe_Runner core (P0/P1) with determinism controls
+  - [x] 10.1 Implement the shared command-composition function
     - Compose every probe command through one function applying
       `--import-mode=importlib`, `-p no:cacheprovider`, neutralised addopts
       (`-o addopts=""`), fixed `--rootdir`, and env `PYTHONHASHSEED=0` +
       `PYTHONDONTWRITEBYTECODE=1`; accept an injected interpreter path so probes
       are runnable before Environment_Builder exists.
     - _Requirements: 6.2, 7.1, 7.2, 7.3, 7.4, 7.5_
-  - [ ] 10.2 Implement probe execution, exit-code integration, timeout, and purge
+  - [x] 10.2 Implement probe execution, exit-code integration, timeout, and purge
     - Launch a probe, purge bytecode/pytest-cache before and after (including on
       termination), enforce the configurable per-probe timeout by killing the
       process tree and reporting INCONCLUSIVE with elapsed duration, classify via
       `interpret_exit_code`, detect the inter-test-module import limitation, and
       raise the abort signal on exit code 2.
     - _Requirements: 6.3, 6.4, 7.6, 7.7, 7b.1, 7b.2, 7b.3, 8.4_
-  - [ ] 10.3 Implement P0 (>=2 fresh worktrees) and the P1 verdict probe
+  - [x] 10.3 Implement P0 (>=2 fresh worktrees) and the P1 verdict probe
     - Run P0 at least twice in freshly created worktrees for baseline validity
       and nondeterminism detection, and run the un-instrumented P1 verdict probe.
     - _Requirements: 6.1, 8b.1, 8c.1, 8c.3_
-  - [ ]* 10.4 Write property test for determinism controls
+  - [x] 10.4 Write property test for determinism controls
     - **Property 10: Every probe command carries the determinism controls**
     - **Validates: Requirements 6.2, 7.1, 7.2, 7.3, 7.4, 7.5**
-  - [ ]* 10.5 Write property test for bytecode purge
+  - [x] 10.5 Write property test for bytecode purge
     - **Property 11: Bytecode is purged around every probe**
     - **Validates: Requirements 7.6, 7.7**
-  - [ ]* 10.6 Write property test for timeout handling
+  - [x] 10.6 Write property test for timeout handling
     - **Property 17: Timeout produces INCONCLUSIVE with recorded duration**
     - **Validates: Requirements 7b.1, 7b.2, 7b.3**
-  - [ ]* 10.7 Write property test for the inter-test import limitation
+  - [x] 10.7 Write property test for the inter-test import limitation
     - **Property 18: Inter-test import limitation is INCONCLUSIVE**
     - **Validates: Requirements 6.3**
 
@@ -194,10 +194,10 @@ implementation sub-tasks are never optional.
       the base-minus-head node-ID difference; record each finding with file and
       hunk. Findings inform probe selection only and never produce a verdict.
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6_
-  - [ ]* 11.2 Write property test for reduced test selection
+  - [ ] 11.2 Write property test for reduced test selection
     - **Property 21: Reduced test selection equals the node-ID set difference**
     - **Validates: Requirements 5.3**
-  - [ ]* 11.3 Write unit tests for static-analysis pattern detectors
+  - [ ] 11.3 Write unit tests for static-analysis pattern detectors
     - Canonical weakening snippets produce the expected finding kinds.
     - _Requirements: 5.1, 5.2, 5.4, 5.5_
 
@@ -228,24 +228,24 @@ implementation sub-tasks are never optional.
       configuration; select the head environment for P2 and the base environment
       for P3 (the environment follows the tests).
     - _Requirements: 4.4, 4.6, 4.8, 6.5, 6.6, 6.7_
-  - [ ]* 13.3 Write property test for graft invariants
+  - [ ] 13.3 Write property test for graft invariants
     - **Property 9: Graft preserves source, grafts the right tests, and never copies verifier config**
     - **Validates: Requirements 6.5, 6.6, 6.7, 4.4, 4.8**
-  - [ ]* 13.4 Write property test for environment selection
+  - [ ] 13.4 Write property test for environment selection
     - **Property 15: Environment follows the tests, not the source**
     - **Validates: Requirements 4.4, 4.8**
-  - [ ]* 13.5 Write property test for import-failure vs test-failure classification
+  - [ ] 13.5 Write property test for import-failure vs test-failure classification
     - **Property 16: Import failure is INCONCLUSIVE, test failure is tests-failed**
     - **Validates: Requirements 4.5, 4.6, 4.7**
-  - [ ]* 13.6 Write the P2-runs-base-source guardrail integration test
+  - [ ] 13.6 Write the P2-runs-base-source guardrail integration test
     - Assert that during P2 the base-only sentinel is observed, proving P2 ran
       the on-disk BASE worktree source and not an installed or head copy.
     - _Requirements: 4.4_
-  - [ ]* 13.7 Write the P3-runs-head-source guardrail integration test
+  - [ ] 13.7 Write the P3-runs-head-source guardrail integration test
     - Assert that during P3 the head-only sentinel is observed, proving P3 ran
       the on-disk HEAD worktree source.
     - _Requirements: 4.8_
-  - [ ]* 13.8 Write unit test for the dependency-only guarantee
+  - [ ] 13.8 Write unit test for the dependency-only guarantee
     - Assert a built environment installs declared dependencies but does NOT
       install the project package into site-packages.
     - _Requirements: 4.1, 4.2, 4.3_
@@ -258,7 +258,7 @@ implementation sub-tasks are never optional.
       production files, emit Cobertura XML, and feed only that XML into
       `map_coverage`; the coverage run never feeds the verdict.
     - _Requirements: 9.1, 9.4_
-  - [ ]* 14.2 Write integration test for coverage emission and mapping
+  - [ ] 14.2 Write integration test for coverage emission and mapping
     - Coverage run emits parseable Cobertura XML that maps onto changed head
       lines; unavailable coverage yields COVERAGE_UNAVAILABLE.
     - _Requirements: 9.1, 9.2_
@@ -276,7 +276,7 @@ implementation sub-tasks are never optional.
       command-path normalisation to `<RUN_ROOT>`/`<WORKTREE>` so the reproducible
       core is byte-identical for identical inputs.
     - _Requirements: 11.1, 11.2, 11.3, 11.4, 11.5_
-  - [ ]* 15.3 Write property test for the Evidence Record
+  - [ ] 15.3 Write property test for the Evidence Record
     - **Property 22: Evidence Record is complete and reproducible**
     - **Validates: Requirements 11.2, 11.4, 11.5**
 
@@ -296,7 +296,7 @@ implementation sub-tasks are never optional.
       failing (VERIFIER_CHANGED_REVIEW_REQUIRED); and a wholesale deletion of a
       discriminating test (VERIFIER_WEAKENED).
     - _Requirements: 16.3, 16.4, 16.5_
-  - [ ]* 17.3 Write integration tests for the fixture scenarios
+  - [ ] 17.3 Write integration tests for the fixture scenarios
     - Assert each scenario produces its expected verdict end-to-end.
     - _Requirements: 16.2, 16.3, 16.4, 16.5, 16.6_
 
@@ -318,20 +318,20 @@ implementation sub-tasks are never optional.
       with no write path into the verdict; produce the verdict and record even
       when no key/network is available.
     - _Requirements: 13.1, 13.2, 13.3_
-  - [ ]* 18.4 Write property test for report contents
+  - [ ] 18.4 Write property test for report contents
     - **Property 23: Report contains the required elements**
     - **Validates: Requirements 12.1**
-  - [ ]* 18.5 Write property test for the exit-code mapping
+  - [ ] 18.5 Write property test for the exit-code mapping
     - **Property 24: Verdict-to-exit-code mapping is injective and documented**
     - **Validates: Requirements 15.1, 15.2, 15.3, 15.4, 15.5, 15.6, 15.7, 15.8, 15.9**
-  - [ ]* 18.6 Write property test for the pytest exit-code-2 abort path
+  - [ ] 18.6 Write property test for the pytest exit-code-2 abort path
     - **Property 20: pytest exit code 2 aborts with no verdict**
     - **Validates: Requirements 8.4, 15.9**
-  - [ ]* 18.7 Write the end-to-end fixture demo integration test
+  - [ ] 18.7 Write the end-to-end fixture demo integration test
     - Run the CLI against the non-discriminating weakened-test fixture and assert
       it produces VERIFIER_WEAKENED with the documented exit code.
     - _Requirements: 16.2, 16.6_
-  - [ ]* 18.8 Write the LLM-isolation test for the optional Explanation_Model
+  - [ ] 18.8 Write the LLM-isolation test for the optional Explanation_Model
     - Assert the verdict and the reproducible core are byte-identical with
       `--explain` on and off; mutating or enabling the explanation output can
       never change the verdict or the reproducible core. This validates the
@@ -363,7 +363,7 @@ implementation sub-tasks are never optional.
     - Verify the `.kiro/` directory is committed and NOT gitignored, and
       finalize DECISIONS.md.
     - _Requirements: 14.2_
-  - [ ]* 20.5 Add a GitHub Action running the plain CLI on pull requests
+  - [ ] 20.5 Add a GitHub Action running the plain CLI on pull requests
     - Run the plain CLI on a pull request (no Kiro / API key required),
       honouring the `--strict` build-blocking policy.
     - _Requirements: 15.1, 15.5_
