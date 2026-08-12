@@ -185,8 +185,8 @@ implementation sub-tasks are never optional.
     - **Property 18: Inter-test import limitation is INCONCLUSIVE**
     - **Validates: Requirements 6.3**
 
-- [ ] 11. Implement the Static_Analyzer
-  - [ ] 11.1 Implement diff detectors and node-ID set comparison
+- [x] 11. Implement the Static_Analyzer
+  - [x] 11.1 Implement diff detectors and node-ID set comparison
     - Detect deleted/weakened assertions, new skip/xfail/deselect, new coverage
       exclusions, lowered `fail_under`, disabled lint/type checking,
       `continue-on-error` CI weakening, fixtures removing a failing condition,
@@ -194,14 +194,14 @@ implementation sub-tasks are never optional.
       the base-minus-head node-ID difference; record each finding with file and
       hunk. Findings inform probe selection only and never produce a verdict.
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6_
-  - [ ] 11.2 Write property test for reduced test selection
+  - [x] 11.2 Write property test for reduced test selection
     - **Property 21: Reduced test selection equals the node-ID set difference**
     - **Validates: Requirements 5.3**
-  - [ ] 11.3 Write unit tests for static-analysis pattern detectors
+  - [x] 11.3 Write unit tests for static-analysis pattern detectors
     - Canonical weakening snippets produce the expected finding kinds.
     - _Requirements: 5.1, 5.2, 5.4, 5.5_
 
-- [ ] 12. Checkpoint - Ensure worktree, probe runner, and analyzer tests pass
+- [x] 12. Checkpoint - Ensure worktree, probe runner, and analyzer tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 13. Environment_Builder + first P2/P3 implementation + shadowing guardrail

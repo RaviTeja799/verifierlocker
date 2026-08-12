@@ -30,16 +30,49 @@ class ProbeOutcome(Enum):
 
 
 @dataclass(frozen=True)
-class Diff:
-    """The set of file paths changed between a base and head revision.
+class DiffHunk:
+    """One hunk of a unified diff for a single file.
 
-    Minimal for now: `File_Classifier.classify` (Task 4.1) only needs the
-    changed paths. `Static_Analyzer.analyze` (Task 11) will later need
-    hunk-level detail; extending this type then is expected and will not
-    change `classify`'s contract, which only reads `changed_paths`.
+    Carries the three line kinds `Static_Analyzer.analyze` (Task 11) needs to
+    reason about a change: `added_lines` are the lines present in head and
+    absent in base (unified-diff `+` lines, with the leading `+` stripped),
+    `removed_lines` are present in base and absent in head (`-` lines,
+    stripped), and `context_lines` are the unchanged lines shown around the
+    change (needed to tell, e.g., whether a removed `raise` sits inside a
+    `@pytest.fixture`). `header` is the raw `@@ -a,b +c,d @@` hunk header and
+    doubles as the finding's hunk-location string (Req 5.5).
+    """
+
+    header: str
+    added_lines: tuple[str, ...] = ()
+    removed_lines: tuple[str, ...] = ()
+    context_lines: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class FileDiff:
+    """The unified-diff hunks for a single changed file."""
+
+    path: str
+    hunks: tuple[DiffHunk, ...] = ()
+
+
+@dataclass(frozen=True)
+class Diff:
+    """The changes between a base and head revision.
+
+    `changed_paths` is the flat set of changed file paths and is the only
+    field `File_Classifier.classify` (Task 4.1) reads -- its contract is
+    unchanged. `file_diffs` carries the optional hunk-level detail that
+    `Static_Analyzer.analyze` (Task 11) inspects for weakening patterns; it
+    defaults to empty so every existing `Diff(changed_paths=...)` construction
+    keeps working. When a caller populates both, `file_diffs[*].path` are
+    expected to be a subset of `changed_paths`, but neither this type nor
+    `classify` enforce or depend on that.
     """
 
     changed_paths: tuple[str, ...]
+    file_diffs: tuple[FileDiff, ...] = ()
 
 
 @dataclass(frozen=True)
