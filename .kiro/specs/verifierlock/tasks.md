@@ -204,8 +204,8 @@ implementation sub-tasks are never optional.
 - [x] 12. Checkpoint - Ensure worktree, probe runner, and analyzer tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 13. Environment_Builder + first P2/P3 implementation + shadowing guardrail
-  - [ ] 13.1 Implement the dependency-only Environment_Builder and import resolution
+- [x] 13. Environment_Builder + first P2/P3 implementation + shadowing guardrail
+  - [x] 13.1 Implement the dependency-only Environment_Builder and import resolution
     - Build each revision's environment preferring `uv` else `venv`+`pip`,
       installing third-party dependencies ONLY and NEVER the project package;
       set `PYTHONPATH` to the worktree root (and `src/` for src-layout) so the
@@ -221,31 +221,31 @@ implementation sub-tasks are never optional.
       already clean and need no such verification. The design intent is fixed:
       install dependencies only, never the project package.
     - _Requirements: 4.1, 4.2, 4.3, 4.5, 4.7_
-  - [ ] 13.2 Implement P2/P3 graft composition and environment selection
+  - [x] 13.2 Implement P2/P3 graft composition and environment selection
     - Compose P2 (copy head test paths into the base worktree) and P3 (copy base
       test paths into the head worktree) with delete-before-copy of destination
       test paths; never modify production source; never copy verifier
       configuration; select the head environment for P2 and the base environment
       for P3 (the environment follows the tests).
     - _Requirements: 4.4, 4.6, 4.8, 6.5, 6.6, 6.7_
-  - [ ] 13.3 Write property test for graft invariants
+  - [x] 13.3 Write property test for graft invariants
     - **Property 9: Graft preserves source, grafts the right tests, and never copies verifier config**
     - **Validates: Requirements 6.5, 6.6, 6.7, 4.4, 4.8**
-  - [ ] 13.4 Write property test for environment selection
+  - [x] 13.4 Write property test for environment selection
     - **Property 15: Environment follows the tests, not the source**
     - **Validates: Requirements 4.4, 4.8**
-  - [ ] 13.5 Write property test for import-failure vs test-failure classification
+  - [x] 13.5 Write property test for import-failure vs test-failure classification
     - **Property 16: Import failure is INCONCLUSIVE, test failure is tests-failed**
     - **Validates: Requirements 4.5, 4.6, 4.7**
-  - [ ] 13.6 Write the P2-runs-base-source guardrail integration test
+  - [x] 13.6 Write the P2-runs-base-source guardrail integration test
     - Assert that during P2 the base-only sentinel is observed, proving P2 ran
       the on-disk BASE worktree source and not an installed or head copy.
     - _Requirements: 4.4_
-  - [ ] 13.7 Write the P3-runs-head-source guardrail integration test
+  - [x] 13.7 Write the P3-runs-head-source guardrail integration test
     - Assert that during P3 the head-only sentinel is observed, proving P3 ran
       the on-disk HEAD worktree source.
     - _Requirements: 4.8_
-  - [ ] 13.8 Write unit test for the dependency-only guarantee
+  - [x] 13.8 Write unit test for the dependency-only guarantee
     - Assert a built environment installs declared dependencies but does NOT
       install the project package into site-packages.
     - _Requirements: 4.1, 4.2, 4.3_

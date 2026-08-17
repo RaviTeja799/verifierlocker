@@ -269,6 +269,43 @@ def detect_import_limitation(output: str) -> str | None:
     return None
 
 
+# --- ENV_INCOMPATIBLE detection for P2/P3 (Task 13.2, Req 4.5, 4.7) ---------
+
+_CANNOT_IMPORT_NAME_RE = re.compile(r"cannot import name ['\"]([\w.]+)['\"]")
+
+
+def detect_env_incompatible(output: str) -> str | None:
+    """Detect that the *other revision's source* will not import/collect under
+    the selected environment (Req 4.5, 4.7, reason code ENV_INCOMPATIBLE).
+
+    This is the P2/P3 counterpart to `detect_import_limitation`. It fires on a
+    collection-time import failure that is NOT an inter-test import: a missing
+    module that is not a test module (a genuinely absent dependency or a
+    production module that does not exist in this revision), or an
+    `ImportError: cannot import name X` -- the signature of the disclosed
+    additive-change limitation, where a head test imports a symbol that the base
+    source does not yet define (design "Known Limitations").
+
+    A genuine *test failure* has no collection marker and is never matched here;
+    it is classified TESTS_FAILED per Requirement 8 (Req 4.6). Returns a detail
+    string when env-incompatible, else `None`. Purely a function of the output,
+    so it is property-testable with scripted output.
+    """
+    lowered = output.lower()
+    if not any(marker in lowered for marker in _COLLECTION_MARKERS):
+        return None
+    # "cannot import name X from Y" -> additive symbol absent in this revision.
+    name_match = _CANNOT_IMPORT_NAME_RE.search(output)
+    if name_match is not None:
+        return f"cannot import name {name_match.group(1)!r}"
+    # A missing module that is NOT an inter-test module -> incompatible env.
+    for match in _MODULE_NOT_FOUND_RE.finditer(output):
+        module = match.group(1)
+        if not _looks_like_test_module(module):
+            return f"No module named {module!r}"
+    return None
+
+
 # --- pytest count parsing (Task 10.2, Req 6.4) -----------------------------
 
 _COLLECTED_RE = re.compile(r"collected (\d+) item")
@@ -307,6 +344,7 @@ def run_probe(
     extra_args: Sequence[str] = (),
     base_env: dict[str, str] | None = None,
     launcher: Launcher | None = None,
+    env_incompatible_detection: bool = False,
 ) -> ProbeResult:
     """Run one probe in `worktree_path` and return its `ProbeResult` (Task 10.2).
 
@@ -314,6 +352,12 @@ def run_probe(
     timeout or abort), enforces the per-probe `timeout`, integrates
     `interpret_exit_code`, detects the inter-test import limitation, and raises
     `ProbeAbort` on pytest exit code 2.
+
+    When `env_incompatible_detection` is set (the P2/P3 case, Task 13.2), a
+    collection-time import failure of the other revision's source under the
+    selected environment is reported INCONCLUSIVE `ENV_INCOMPATIBLE` (Req 4.5,
+    4.7) instead of aborting; a genuine test failure is unaffected and stays
+    TESTS_FAILED (Req 4.6).
     """
     worktree_path = Path(worktree_path)
     interpreter = interpreter or sys.executable
@@ -350,6 +394,25 @@ def run_probe(
                 output=combined_output,
                 elapsed=launch.elapsed_seconds,
             )
+
+        # Req 4.5/4.7: for P2/P3, the other revision's source failing to
+        # import/collect under the selected env is ENV_INCOMPATIBLE (not an
+        # abort and not a test failure). Checked before the exit-2 abort so a
+        # collection failure surfacing as exit 2 does not abort the run.
+        if env_incompatible_detection:
+            incompatible = detect_env_incompatible(combined_output)
+            if incompatible is not None:
+                return _result(
+                    command,
+                    worktree_path,
+                    probe_id,
+                    repetition,
+                    exit_code=launch.returncode,
+                    outcome=ProbeOutcome.INCONCLUSIVE,
+                    reason=f"{reasons.ENV_INCOMPATIBLE}:{incompatible}",
+                    output=combined_output,
+                    elapsed=launch.elapsed_seconds,
+                )
 
         # Req 8.4: exit code 2 aborts the whole run with no verdict.
         if launch.returncode == 2:
@@ -489,4 +552,119 @@ def run_p1(
         extra_args=extra_args,
         base_env=base_env,
         launcher=launcher,
+    )
+
+
+# --- P2/P3 graft composition (Task 13.2) -----------------------------------
+
+
+def graft_tests(source_worktree: Path, dest_worktree: Path, test_paths: Sequence[str]) -> None:
+    """Graft `source_worktree`'s test paths into `dest_worktree` (Req 6.5-6.7).
+
+    Composes a probe's test set with three invariants:
+
+    1. **Never modifies production source.** Only the entries in `test_paths`
+       (already classified as TEST by the File_Classifier) are touched; no
+       production file in `dest_worktree` is written or removed.
+    2. **Never copies verifier configuration.** Callers pass test paths only;
+       verifier-config paths are excluded upstream (Req 6.7).
+    3. **Delete-before-copy.** Each destination test path is cleared before the
+       source copy, so a test that exists only in the destination revision
+       cannot linger and be counted alongside the grafted set -- after grafting,
+       the destination test paths are exactly the source revision's test set
+       (design Probe_Runner "Delete-before-copy", evidence-correctness measure).
+
+    `test_paths` are worktree-relative and may be files or directories. Missing
+    source entries are skipped (the destination copy is still cleared, honouring
+    delete-before-copy for a test deleted in the grafted revision).
+    """
+    source_worktree = Path(source_worktree)
+    dest_worktree = Path(dest_worktree)
+    for rel in test_paths:
+        rel_norm = str(rel).strip()
+        if not rel_norm or os.path.isabs(rel_norm):
+            continue
+        dest = dest_worktree / rel_norm
+        # Delete-before-copy: clear the destination entry first.
+        if dest.is_dir() and not dest.is_symlink():
+            shutil.rmtree(dest, ignore_errors=True)
+        elif dest.exists() or dest.is_symlink():
+            try:
+                dest.unlink()
+            except OSError:
+                pass
+
+        src = source_worktree / rel_norm
+        if src.is_dir() and not src.is_symlink():
+            shutil.copytree(src, dest)
+        elif src.is_file():
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(src, dest)
+        # If src does not exist, the grafted revision deleted this test path;
+        # leaving the destination cleared is correct.
+
+
+# --- P2/P3 runners (Task 13.2) ---------------------------------------------
+
+
+def run_p2(
+    base_worktree: Path,
+    head_worktree: Path,
+    head_test_paths: Sequence[str],
+    head_env,
+    *,
+    timeout: float | None = None,
+    launcher: Launcher | None = None,
+) -> ProbeResult:
+    """Run P2: BASE production source + grafted HEAD tests, under the HEAD env.
+
+    Grafts the head test paths into the base worktree (delete-before-copy) and
+    runs pytest there using the head environment's interpreter, with PYTHONPATH
+    pinned to the BASE worktree so the on-disk base source wins over
+    site-packages (Concern 3). The environment follows the tests (head), the
+    source is base (Req 4.4). A collection failure of the base source under the
+    head env is ENV_INCOMPATIBLE (Req 4.5).
+    """
+    from .environment import probe_env  # local import avoids a cycle at import time
+
+    graft_tests(head_worktree, base_worktree, head_test_paths)
+    return run_probe(
+        base_worktree,
+        probe_id="P2",
+        interpreter=head_env.python_path,
+        timeout=timeout,
+        base_env=probe_env(head_env, base_worktree),
+        launcher=launcher,
+        env_incompatible_detection=True,
+    )
+
+
+def run_p3(
+    head_worktree: Path,
+    base_worktree: Path,
+    base_test_paths: Sequence[str],
+    base_env,
+    *,
+    timeout: float | None = None,
+    launcher: Launcher | None = None,
+) -> ProbeResult:
+    """Run P3: HEAD production source + grafted BASE tests, under the BASE env.
+
+    Symmetric to `run_p2`: grafts base test paths into the head worktree and
+    runs pytest there using the base environment's interpreter, with PYTHONPATH
+    pinned to the HEAD worktree so the on-disk head source wins (Req 4.8). A
+    collection failure of the head source under the base env is ENV_INCOMPATIBLE
+    (Req 4.7).
+    """
+    from .environment import probe_env
+
+    graft_tests(base_worktree, head_worktree, base_test_paths)
+    return run_probe(
+        head_worktree,
+        probe_id="P3",
+        interpreter=base_env.python_path,
+        timeout=timeout,
+        base_env=probe_env(base_env, head_worktree),
+        launcher=launcher,
+        env_incompatible_detection=True,
     )
