@@ -50,7 +50,7 @@ import sys
 import time
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 from . import reasons
 from .exit_code import interpret_exit_code
@@ -105,6 +105,86 @@ def compose_probe_command(
     env["PYTHONHASHSEED"] = "0"  # Req 7.4
     env["PYTHONDONTWRITEBYTECODE"] = "1"  # Req 7.4
     return ProbeCommand(argv=argv, env=env)
+
+
+# --- Coverage command composition (Task 14.1, Req 9.1) ---------------------
+
+
+def derive_coverage_sources(production_files: Sequence[str]) -> tuple[str, ...]:
+    """Derive coverage.py's `--source` set from classified production files (Req 9.1).
+
+    Coverage is *measured* only over the production code under test, so the
+    measured `--source` set is derived from the files the File_Classifier
+    labelled PRODUCTION (never test or verifier-config files). Each production
+    path is reduced to its top-level importable name:
+
+    - a leading `src/` (src-layout) is stripped so `src/pkg/mod.py` -> `pkg`;
+    - a package path `pkg/sub/mod.py` -> the top package `pkg`;
+    - a top-level module file `app.py` -> the module name `app`.
+
+    The result is sorted and de-duplicated so the emitted command (and thus the
+    Evidence Record) is deterministic for a given input.
+    """
+    sources: set[str] = set()
+    for raw in production_files:
+        parts = [p for p in PurePosixPath(str(raw)).parts if p not in ("", "/", ".")]
+        if parts and parts[0] == "src":
+            parts = parts[1:]
+        if not parts:
+            continue
+        top = parts[0]
+        if len(parts) == 1 and top.endswith(".py"):
+            # A top-level module file -> the module name (drop the extension).
+            top = top[:-3]
+        if top:
+            sources.add(top)
+    return tuple(sorted(sources))
+
+
+def compose_coverage_command(
+    interpreter: str | Path,
+    worktree: Path,
+    *,
+    coverage_sources: Sequence[str] = (),
+    data_file: Path | None = None,
+    extra_args: Sequence[str] = (),
+    base_env: dict[str, str] | None = None,
+) -> ProbeCommand:
+    """Compose the instrumented P1 coverage command (Task 14.1, Req 9.1).
+
+    Runs the SAME determinism-controlled pytest invocation as
+    `compose_probe_command`, but under `coverage run -m pytest` (NOT pytest's
+    `--cov` plugin, so no pytest plugin can perturb the run) with the measured
+    `--source` set. To guarantee the determinism controls (Req 6.2, 7.1-7.5)
+    cannot drift from the un-instrumented probes, this reuses
+    `compose_probe_command` and splices `coverage run` between the interpreter
+    and its `-m pytest`, leaving the control flags untouched.
+    """
+    base = compose_probe_command(
+        interpreter, worktree, extra_args=extra_args, base_env=base_env
+    )
+    # base.argv == (interp, "-m", "pytest", <controls...>, <extra...>).
+    pytest_index = base.argv.index("pytest")
+    pytest_tail = base.argv[pytest_index:]  # ("pytest", <controls...>, <extra...>)
+
+    source_args: tuple[str, ...] = ()
+    if coverage_sources:
+        source_args = (f"--source={','.join(coverage_sources)}",)
+    data_args: tuple[str, ...] = ()
+    if data_file is not None:
+        data_args = (f"--data-file={data_file}",)
+
+    argv = (
+        str(interpreter),
+        "-m",
+        "coverage",
+        "run",
+        *source_args,
+        *data_args,
+        "-m",
+        *pytest_tail,
+    )
+    return ProbeCommand(argv=argv, env=dict(base.env))
 
 
 # --- Bytecode purge (Task 10.2, Req 7.6, 7.7) ------------------------------
@@ -553,6 +633,149 @@ def run_p1(
         base_env=base_env,
         launcher=launcher,
     )
+
+
+# --- P1 coverage run: the separate instrumented fifth run (Task 14.1) -------
+
+
+@dataclass(frozen=True)
+class CoverageRunResult:
+    """The outcome of the instrumented P1 coverage run (Task 14.1, Req 9.1).
+
+    `cobertura_xml` is the Cobertura document to feed into
+    `coverage.map_coverage` -- an empty string when coverage could not be
+    produced, which `map_coverage` maps to INCONCLUSIVE `COVERAGE_UNAVAILABLE`
+    (Req 9.4, verdict row 10.12). `sources` is the derived `--source` set, and
+    `probe` records the instrumented run itself. This run NEVER feeds the
+    verdict (design Concern 2): only its emitted coverage is consumed, and only
+    via the pure `map_coverage`.
+    """
+
+    cobertura_xml: str
+    sources: tuple[str, ...]
+    probe: ProbeResult
+    reason: str | None = None
+
+
+def run_p1_coverage(
+    worktree_path: Path,
+    production_files: Sequence[str],
+    *,
+    interpreter: str | Path | None = None,
+    timeout: float | None = None,
+    base_env: dict[str, str] | None = None,
+    launcher: Launcher | None = None,
+    coverage_dir: Path | None = None,
+) -> CoverageRunResult:
+    """Run the coverage.py-instrumented P1 run and emit Cobertura XML (Task 14.1).
+
+    This is the separate, fifth run described in design Concern 2: it re-runs the
+    IDENTICAL head-source + head-test composition already present in the `p1`
+    worktree, but under `coverage run -m pytest` (not `--cov`) with the shared
+    determinism controls, measuring only the `--source` package set derived from
+    the classified PRODUCTION files. It then materialises Cobertura XML via
+    `coverage xml`. The XML is the only thing consumed downstream, and only by
+    the pure `map_coverage`; this run never produces or influences the verdict.
+
+    The coverage data file and XML are written to a directory OUTSIDE the
+    worktree (a sibling by default) so pytest never discovers them and grafting
+    never touches them. Bytecode is purged around the run exactly as for the
+    un-instrumented probes (Req 7.6, 7.7). On any failure to produce parseable
+    coverage the result carries an empty `cobertura_xml` and a
+    `COVERAGE_UNAVAILABLE` reason, so the downstream mapping yields
+    COVERAGE_UNAVAILABLE rather than a spurious verdict.
+    """
+    worktree_path = Path(worktree_path)
+    interpreter = interpreter or sys.executable
+    launcher = launcher or _subprocess_launcher
+
+    coverage_dir = Path(
+        coverage_dir
+        if coverage_dir is not None
+        else worktree_path.parent / f"{worktree_path.name}-coverage"
+    )
+    coverage_dir.mkdir(parents=True, exist_ok=True)
+    data_file = coverage_dir / ".coverage"
+    xml_path = coverage_dir / "coverage.xml"
+    # A stale data file / XML from a prior run must not leak into this one.
+    for stale in (data_file, xml_path):
+        try:
+            stale.unlink()
+        except OSError:
+            pass
+
+    sources = derive_coverage_sources(production_files)
+
+    run_command = compose_coverage_command(
+        interpreter,
+        worktree_path,
+        coverage_sources=sources,
+        data_file=data_file,
+        base_env=base_env,
+    )
+
+    purge_bytecode(worktree_path)  # Req 7.6
+    try:
+        launch = launcher(run_command.argv, worktree_path, run_command.env, timeout)
+
+        if launch.timed_out:
+            probe = _timeout_result(
+                run_command, worktree_path, "P1-COV", 0, timeout, launch
+            )
+            return CoverageRunResult(
+                cobertura_xml="",
+                sources=sources,
+                probe=probe,
+                reason=probe.reason,
+            )
+
+        combined_output = f"{launch.stdout}\n{launch.stderr}"
+        # The coverage run never feeds the verdict, so exit code 2 does NOT
+        # abort here; it is simply interpreted like any other run.
+        outcome, reason = interpret_exit_code(launch.returncode)
+        probe = _result(
+            run_command,
+            worktree_path,
+            "P1-COV",
+            0,
+            exit_code=launch.returncode,
+            outcome=outcome,
+            reason=reason,
+            output=combined_output,
+            elapsed=launch.elapsed_seconds,
+        )
+
+        # Materialise Cobertura XML from the collected data (Req 9.1).
+        xml_command = (
+            str(interpreter),
+            "-m",
+            "coverage",
+            "xml",
+            f"--data-file={data_file}",
+            "-o",
+            str(xml_path),
+        )
+        launcher(xml_command, worktree_path, run_command.env, timeout)
+
+        cobertura_xml = ""
+        unavailable: str | None = None
+        if xml_path.is_file():
+            try:
+                cobertura_xml = xml_path.read_text()
+            except OSError as exc:
+                unavailable = f"{reasons.COVERAGE_UNAVAILABLE}:xml_unreadable:{exc}"
+        if not cobertura_xml.strip():
+            cobertura_xml = ""
+            unavailable = unavailable or f"{reasons.COVERAGE_UNAVAILABLE}:no_xml_emitted"
+
+        return CoverageRunResult(
+            cobertura_xml=cobertura_xml,
+            sources=sources,
+            probe=probe,
+            reason=unavailable,
+        )
+    finally:
+        purge_bytecode(worktree_path)  # Req 7.7
 
 
 # --- P2/P3 graft composition (Task 13.2) -----------------------------------

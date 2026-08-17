@@ -250,15 +250,15 @@ implementation sub-tasks are never optional.
       install the project package into site-packages.
     - _Requirements: 4.1, 4.2, 4.3_
 
-- [ ] 14. Implement the P1 coverage run (separate instrumented fifth run)
-  - [ ] 14.1 Implement the coverage.py-driven P1 coverage run
+- [x] 14. Implement the P1 coverage run (separate instrumented fifth run)
+  - [x] 14.1 Implement the coverage.py-driven P1 coverage run
     - Run the identical head-source + head-test composition in the `p1` worktree
       under `coverage run -m pytest` (not `--cov`) with the shared determinism
       controls, derive the measured `--source` package set from classified
       production files, emit Cobertura XML, and feed only that XML into
       `map_coverage`; the coverage run never feeds the verdict.
     - _Requirements: 9.1, 9.4_
-  - [ ] 14.2 Write integration test for coverage emission and mapping
+  - [x] 14.2 Write integration test for coverage emission and mapping
     - Coverage run emits parseable Cobertura XML that maps onto changed head
       lines; unavailable coverage yields COVERAGE_UNAVAILABLE.
     - _Requirements: 9.1, 9.2_
