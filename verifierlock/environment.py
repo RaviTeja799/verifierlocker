@@ -56,7 +56,7 @@ import shlex
 import shutil
 import subprocess
 import sys
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -506,6 +506,33 @@ class Environment_Builder:
             built=True,
             error=None,
         )
+
+    def ensure_packages(self, env: BuiltEnv, packages: Sequence[str]) -> bool:
+        """Install additional measurement packages into an already-built env.
+
+        Used by the Orchestrator to make `coverage.py` available inside a built
+        environment so the instrumented P1 coverage run (Concern 2) can execute
+        under the environment that carries the head dependencies. This does NOT
+        install the project package (the dependency-only guarantee is unchanged:
+        `installed_project` stays False) -- it only adds third-party measurement
+        tooling. Best-effort: returns True on success, False otherwise, so a
+        failure simply yields COVERAGE_UNAVAILABLE downstream rather than
+        aborting the run.
+        """
+        if not env.ok or env.python_path is None or not packages:
+            return False
+        env_python = Path(env.python_path)
+        if self.tool == "uv":
+            cmd: tuple[str, ...] = (
+                "uv", "pip", "install", "--python", str(env_python), *packages
+            )
+        else:
+            cmd = (str(env_python), "-m", "pip", "install", *packages)
+        try:
+            result = self._runner(cmd, env_python.parent, dict(os.environ))
+        except OSError:
+            return False
+        return result.returncode == 0
 
     def _failed(self, revision: str, source: str, pythonpath: tuple[str, ...], error: str) -> BuiltEnv:
         return BuiltEnv(

@@ -263,20 +263,20 @@ implementation sub-tasks are never optional.
       lines; unavailable coverage yields COVERAGE_UNAVAILABLE.
     - _Requirements: 9.1, 9.2_
 
-- [ ] 15. Wire the Orchestrator and assemble the full Evidence Record
-  - [ ] 15.1 Implement the Orchestrator pipeline
+- [x] 15. Wire the Orchestrator and assemble the full Evidence Record
+  - [x] 15.1 Implement the Orchestrator pipeline
     - Drive the fixed pipeline with pre-probe short-circuits (Req 1.3/1.4/2.2/
       2.3/4b.5), probe selection from classification, P0/P1 then structurally
       required P2/P3, environment wiring into every probe, and guaranteed
       worktree cleanup.
     - _Requirements: 10.14, 10.15_
-  - [ ] 15.2 Implement the full Evidence_Recorder with reproducible-core normalisation
+  - [x] 15.2 Implement the full Evidence_Recorder with reproducible-core normalisation
     - Assemble the complete Evidence Record with deterministically ordered
       arrays, explicit reasons for every INCONCLUSIVE/skip/BASELINE_INVALID, and
       command-path normalisation to `<RUN_ROOT>`/`<WORKTREE>` so the reproducible
       core is byte-identical for identical inputs.
     - _Requirements: 11.1, 11.2, 11.3, 11.4, 11.5_
-  - [ ] 15.3 Write property test for the Evidence Record
+  - [x] 15.3 Write property test for the Evidence Record
     - **Property 22: Evidence Record is complete and reproducible**
     - **Validates: Requirements 11.2, 11.4, 11.5**
 

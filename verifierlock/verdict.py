@@ -249,3 +249,69 @@ def decide(inputs: VerdictInputs) -> tuple[Verdict, str]:
     if all(changed_line.covered for changed_line in coverage.lines):
         return Verdict.INDEPENDENT_EVIDENCE, reasons.ALL_CHANGED_LINES_COVERED  # 9
     return Verdict.NO_INDEPENDENT_EVIDENCE, reasons.CHANGED_LINES_UNCOVERED     # 10
+
+
+# --- Verdict-to-exit-code mapping (design "Verdict-to-Exit-Code Mapping", Req 15) ---
+
+# The documented, distinct exit code for each verdict plus the aborted-no-verdict
+# outcome. `0` is reserved for the clean verdict (INDEPENDENT_EVIDENCE), matching
+# Unix convention. This is the single source of truth reused by the Evidence
+# Record's `verdict.exit_code` and by the CLI (Task 18).
+VERDICT_EXIT_CODES: dict[Verdict, int] = {
+    Verdict.INDEPENDENT_EVIDENCE: 0,          # Req 15.2
+    Verdict.NO_INDEPENDENT_EVIDENCE: 10,      # Req 15.3
+    Verdict.NO_VERIFIER_CHANGE: 11,           # Req 15.4
+    Verdict.VERIFIER_WEAKENED: 12,            # Req 15.5
+    Verdict.VERIFIER_CHANGED_REVIEW_REQUIRED: 13,  # Req 15.6
+    Verdict.INCONCLUSIVE: 14,                 # Req 15.7
+    Verdict.BASELINE_INVALID: 15,             # Req 15.8
+}
+
+# The distinct process exit code used when a probe returned pytest exit code 2
+# and the run aborted with no verdict (Req 8.4, 15.9). It is intentionally not a
+# `Verdict`, since no verdict was produced.
+ABORTED_NO_VERDICT_EXIT_CODE = 16
+
+
+def verdict_exit_code(verdict: Verdict) -> int:
+    """The documented process exit code for `verdict` (Req 15.1-15.8)."""
+    return VERDICT_EXIT_CODES[verdict]
+
+
+# --- Reason-code to matched-rule mapping (design Verdict_Engine table) -------
+
+# Maps the reason code (the part of `decide`'s reason before any ``:detail``) to
+# the rule row that produced it, recorded as `verdict.matched_rule` in the
+# Evidence Record. Rows 0a-0e are the pre-probe short-circuits (string labels);
+# rows 1-11 are the numbered rows. Both `BASELINE_NOT_ASSESSED` (the assess-vs-
+# unstable refinement) and the two assessed-baseline codes belong to row 1.
+_REASON_TO_RULE: dict[str, int | str] = {
+    reasons.BASELINE_REF_UNRESOLVED: "0a",
+    reasons.HEAD_REF_UNRESOLVED: "0b",
+    reasons.NOT_A_GIT_REPO: "0c",
+    reasons.HAS_SUBMODULES: "0d",
+    reasons.UNCLASSIFIABLE_FILE: "0e",
+    reasons.BASELINE_NOT_ASSESSED: 1,
+    reasons.BASELINE_NONDETERMINISTIC: 1,
+    reasons.BASELINE_NOT_GREEN: 1,
+    reasons.HEAD_NOT_GREEN: 2,
+    reasons.NO_TEST_OR_VERIFIER_CHANGE: 3,
+    reasons.NO_PRODUCTION_CHANGE: 4,
+    reasons.REQUIRED_PROBE_INCONCLUSIVE: 5,
+    reasons.P2_PASS_P3_FAIL: 6,
+    reasons.P2_FAIL_P3_FAIL: 7,
+    reasons.P2_FAIL_P3_PASS: 8,
+    reasons.ALL_CHANGED_LINES_COVERED: 9,
+    reasons.CHANGED_LINES_UNCOVERED: 10,
+    reasons.COVERAGE_UNAVAILABLE: 11,
+}
+
+
+def reason_code_of(reason: str) -> str:
+    """The bare reason code (the part before any ``:detail`` suffix)."""
+    return reason.split(":", 1)[0]
+
+
+def matched_rule_of(reason: str) -> int | str | None:
+    """The verdict-table rule row for `reason`, or None if unrecognised."""
+    return _REASON_TO_RULE.get(reason_code_of(reason))
