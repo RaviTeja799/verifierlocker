@@ -280,7 +280,7 @@ implementation sub-tasks are never optional.
     - **Property 22: Evidence Record is complete and reproducible**
     - **Validates: Requirements 11.2, 11.4, 11.5**
 
-- [ ] 16. Checkpoint - Ensure the full pipeline runs against a real repo
+- [x] 16. Checkpoint - Ensure the full pipeline runs against a real repo
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 17. Build the bundled labelled fixture repository
