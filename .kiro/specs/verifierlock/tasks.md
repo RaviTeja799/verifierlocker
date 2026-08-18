@@ -283,20 +283,20 @@ implementation sub-tasks are never optional.
 - [x] 16. Checkpoint - Ensure the full pipeline runs against a real repo
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 17. Build the bundled labelled fixture repository
-  - [ ] 17.1 Create the fixture with a real authorization defect and a NON-DISCRIMINATING weakened test
+- [x] 17. Build the bundled labelled fixture repository
+  - [x] 17.1 Create the fixture with a real authorization defect and a NON-DISCRIMINATING weakened test
     - Create the fixture repo under `fixtures/`, labelled as a test fixture, with
       a real authorization defect; the weakened test MUST pass against BOTH
       base-revision and head-revision production source so P2 is classified
       all-passed and the demo yields VERIFIER_WEAKENED.
     - _Requirements: 16.1, 16.2, 16.6_
-  - [ ] 17.2 Create the remaining labelled fixture scenarios
+  - [x] 17.2 Create the remaining labelled fixture scenarios
     - Add: weakened test replaced with an independent regression test
       (INDEPENDENT_EVIDENCE); a legitimate behaviour change with P2 and P3 both
       failing (VERIFIER_CHANGED_REVIEW_REQUIRED); and a wholesale deletion of a
       discriminating test (VERIFIER_WEAKENED).
     - _Requirements: 16.3, 16.4, 16.5_
-  - [ ] 17.3 Write integration tests for the fixture scenarios
+  - [x] 17.3 Write integration tests for the fixture scenarios
     - Assert each scenario produces its expected verdict end-to-end.
     - _Requirements: 16.2, 16.3, 16.4, 16.5, 16.6_
 
