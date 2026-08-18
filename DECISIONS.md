@@ -314,7 +314,8 @@ reasoning matters more than the conclusion.
 Kiro was used throughout: requirements-first spec, requirements analysis,
 design, and task-driven implementation.
 
-Budget: 2000 Kiro credits.
+Budget: 2000 Kiro credits. Consumed to date: **700 credits** — requirements,
+analysis, design, and all 20 implementation task groups.
 
 | Work | Model | Rationale |
 |---|---|---|
@@ -333,3 +334,78 @@ Human responsibility, stated plainly: we chose the problem, defined the product,
 reviewed and corrected the requirements by hand, traced the verdict table
 ourselves, made every scope decision, and own the result. Models drafted and
 reviewed; they did not decide.
+
+---
+
+## 11. What implementation settled
+
+Written after the code existed, which is the point: §8 deferred these
+deliberately rather than speculating.
+
+### 11.1 The deferred questions, answered
+
+| # (from §8) | Resolution |
+|---|---|
+| 1 — dependency discovery | Fixed precedence: explicit `--install-cmd`, then `pyproject.toml`, then `requirements*.txt`, then `setup.py` declared deps, else `DEPS_UNDISCOVERABLE` → INCONCLUSIVE |
+| 2 — coverage inside or beside P1 | **Beside.** A separate, fifth instrumented run (`coverage run -m pytest`, never `--cov`), whose pass/fail never feeds the verdict. Only its Cobertura XML is consumed, and only by the pure `map_coverage` |
+| 3 — where classification failure sits | Pre-probe short-circuit (verdict row 0e). An unclassifiable path decides the run before any repository code executes |
+| 4 — breadth of the importlib limitation | Detection implemented and property-tested (`IMPORT_LIMITATION` → INCONCLUSIVE), but the *breadth* across real-world repositories is still unmeasured. Disclosed as a limitation rather than claimed as solved |
+| 5 — static pre-pass: skip or annotate | **Annotate and select only.** Findings inform probe selection and the record; they never produce a verdict (Req 5.6) |
+
+### 11.2 The provisional uv command was wrong, and was replaced
+
+The design flagged `uv pip install --only-deps .` as provisional and demanded
+verification. It does not do what the design needs, so the implemented plan is:
+
+- **uv:** `uv pip compile pyproject.toml -o resolved.txt` then
+  `uv pip install -r resolved.txt`. The project is never built and never
+  installed.
+- **venv + pip fallback:** install the project then uninstall it by name, so only
+  its dependencies remain. This is the one place a project package is transiently
+  present, and it is gone by the end of the same plan.
+
+Both record `installed_project=false` and `install_kind="deps_only"` in the
+Evidence Record, so the guarantee is auditable rather than asserted.
+
+Related: `coverage` is a *measurement* tool, not a declared dependency of the
+analysed repository, so it is injected into the head environment immediately
+before the instrumented run. If that injection fails the run yields
+`COVERAGE_UNAVAILABLE` instead of a spurious verdict.
+
+### 11.3 The exit-code policy default follows the requirements, not the design sketch
+
+The design discusses a lenient CI policy as the *default* (only
+VERIFIER_WEAKENED build-blocking). Requirements 15.1–15.8 say the CLI shall set a
+**distinct documented exit code per verdict**, and Property 24 asserts the CLI
+returns the documented code. A lenient default contradicts both, because it
+collapses several verdicts onto 0.
+
+Resolved in favour of the requirements: `--exit-policy documented` is the
+default, and the gating policies are opt-in (`--exit-policy lenient`, and
+`--strict` for the design's stricter gate). A blocking outcome keeps its own
+documented code; other outcomes report 0. Both the documented code and the
+policy-applied status are written to the Evidence Record's `exit_status` block,
+so nothing about the verdict is hidden by the gate.
+
+The design's CI-ergonomics argument still stands and is still available — it is
+now a flag rather than a default.
+
+### 11.4 The LLM boundary is structural, not a convention
+
+The optional explanation reads a `deepcopy` of the finished Evidence Record and
+returns prose. Its output is attached under a record key the reproducible core
+does not read. The test for this is adversarial: a narrator that actively rewrites
+the verdict, deletes the probe evidence, and forges coverage changes nothing —
+verdict, exit code, and reproducible core stay byte-identical.
+
+v1 ships only the deterministic offline narrator: no model SDK is a dependency
+and no network call exists anywhere in the tool, so `--explain` works with no key
+and no connectivity (Req 13.3).
+
+### 11.5 Delete-before-copy, revisited
+
+§9 records that we corrected our own reasoning here: leftover destination test
+files cannot flip a verdict, because P0 and P1 have both passed by the time P2
+and P3 run. Delete-before-copy was kept anyway, because it keeps the collected /
+passed / failed counts in the Evidence Record honest. Hygiene for the evidence,
+not correctness for the verdict.

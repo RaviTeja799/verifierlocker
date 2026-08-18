@@ -42,8 +42,11 @@ get unless you explicitly opt into a gating policy.
 ## Locality (Req 14.2, 14.3)
 
 `--repo` must be an existing local directory; remote-looking references are
-rejected before anything runs. Nothing in VerifierLock makes an outbound network
-call, and the CLI writes only to the paths the caller names.
+rejected before anything runs. No repository content and no secret is ever
+transmitted, and the CLI writes only to the paths the caller names. The one piece
+of outbound traffic a run can generate is the per-revision dependency install
+that `uv`/`pip` performs against the configured package index (overridable with
+`--install-cmd`); the engine, the report, and the optional explanation are local.
 """
 
 from __future__ import annotations

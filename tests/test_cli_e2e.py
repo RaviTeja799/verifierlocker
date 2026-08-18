@@ -21,7 +21,8 @@ from pathlib import Path
 
 import pytest
 
-from verifierlock import cli
+from verifierlock import cli, demo
+from verifierlock.verdict import VERDICT_EXIT_CODES, Verdict
 
 from .fixture_repo import build_scenario_repo
 
@@ -98,6 +99,41 @@ def test_cli_strict_policy_still_blocks_the_weakened_fixture(tmp_path: Path) -> 
     assert status == 12
     assert record["exit_status"]["policy"] == "strict"
     assert record["exit_status"]["build_blocking"] is True
+
+
+def test_demo_lists_every_bundled_scenario_with_its_documented_code() -> None:
+    """`python -m verifierlock.demo --list` is the quickstart's entry point, so
+    it must name every bundled scenario and agree with the documented codes."""
+    completed = subprocess.run(
+        [sys.executable, "-m", "verifierlock.demo", "--list"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert completed.returncode == 0
+    for scenario, (verdict, code) in demo.SCENARIOS.items():
+        assert scenario in completed.stdout
+        assert f"{verdict} (exit {code})" in completed.stdout
+    # The demo's expectations must match the engine's documented mapping.
+    for verdict_name, code in [(v, c) for v, c in demo.SCENARIOS.values()]:
+        assert VERDICT_EXIT_CODES[Verdict(verdict_name)] == code
+
+
+def test_demo_materialises_a_two_commit_repository(tmp_path: Path) -> None:
+    """The fixture snapshots become a real base..head history, which is what
+    makes the demo reproducible from a cold clone."""
+    repo = demo.build_scenario_repo("weakened_authz", tmp_path / "repo")
+
+    log = subprocess.run(
+        ["git", "log", "--format=%s"],
+        cwd=repo,
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    assert log.stdout.split() == ["head", "base"]
+    assert (repo / "authz" / "__init__.py").is_file()
+    assert (repo / "tests").is_dir()
 
 
 def test_cli_is_invokable_as_a_module() -> None:

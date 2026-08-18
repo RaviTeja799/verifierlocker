@@ -1,0 +1,15 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Run the suite after each spec task",
+      "trigger": "PostTaskExec",
+      "description": "Runs the full test suite (including the 24 Hypothesis property tests) whenever a spec task is marked completed, so no task can be closed on a red suite.",
+      "action": {
+        "type": "command",
+        "command": "python -m pytest -q",
+        "timeout": 600
+      }
+    }
+  ]
+}

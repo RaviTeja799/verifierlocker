@@ -338,11 +338,11 @@ implementation sub-tasks are never optional.
       design's LLM-isolation guarantee.
     - _Requirements: 13.1, 13.2_
 
-- [ ] 19. Final checkpoint - Ensure all tests pass and the fixture demo works
+- [x] 19. Final checkpoint - Ensure all tests pass and the fixture demo works
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 20. Submission packaging
-  - [ ] 20.1 Write the README
+- [~] 20. Submission packaging
+  - [x] 20.1 Write the README
     - Cover the problem statement, quickstart from a cold clone, usage, the
       verdict-to-exit-code table, how Kiro was used (specs / steering / hooks /
       skills), costs and credit consumption (record actual credits used - 120 to
@@ -351,19 +351,19 @@ implementation sub-tasks are never optional.
       INCONCLUSIVE limitation, reusing the DECISIONS.md section 8 text verbatim
       as README section 20.1.
     - _Requirements: 12.1, 14.2_
-  - [ ] 20.2 Add a Dockerfile for a reproducible judging environment
+  - [x] 20.2 Add a Dockerfile for a reproducible judging environment
     - Pin Python 3.14 + uv + git so judges get a reproducible environment;
       document `docker run` usage in the README.
     - _Requirements: 4.1, 14.2_
-  - [ ] 20.3 Add a LICENSE and third-party attribution list
+  - [x] 20.3 Add a LICENSE and third-party attribution list
     - Add a permissive LICENSE (e.g. MIT/Apache-2.0) and a third-party
       attribution list covering Hypothesis, coverage.py, uv, and pytest.
     - _Requirements: 14.2_
-  - [ ] 20.4 Finalize the committed .kiro/ directory and DECISIONS.md
+  - [x] 20.4 Finalize the committed .kiro/ directory and DECISIONS.md
     - Verify the `.kiro/` directory is committed and NOT gitignored, and
       finalize DECISIONS.md.
     - _Requirements: 14.2_
-  - [ ] 20.5 Add a GitHub Action running the plain CLI on pull requests
+  - [x] 20.5 Add a GitHub Action running the plain CLI on pull requests
     - Run the plain CLI on a pull request (no Kiro / API key required),
       honouring the `--strict` build-blocking policy.
     - _Requirements: 15.1, 15.5_

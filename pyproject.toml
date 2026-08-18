@@ -2,7 +2,7 @@
 name = "verifierlock"
 version = "0.1.0"
 description = "VerifierLock: detects whether a Git change has independent test evidence or weakened its own verifier."
-readme = "DECISIONS.md"
+readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
 dependencies = [

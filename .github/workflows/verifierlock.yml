@@ -1,0 +1,105 @@
+# VerifierLock CI (Task 20.5).
+#
+# Two jobs, both running the plain CLI / plain pytest: no Kiro, no API key, no
+# language model is involved anywhere in this workflow. The verdict comes from
+# the deterministic engine (Req 13.1), so a fork PR with no secrets gets the
+# same result as a trusted branch.
+#
+#   tests          - the project's own suite (189 tests, 24 design properties)
+#   verifier-lock  - runs VerifierLock on the pull request itself, under the
+#                    --strict build-blocking policy (Req 15.1, 15.5)
+#
+# Under --strict the job fails only on VERIFIER_WEAKENED (exit 12) and
+# VERIFIER_CHANGED_REVIEW_REQUIRED (exit 13). Informational verdicts
+# (NO_VERIFIER_CHANGE, NO_INDEPENDENT_EVIDENCE, INCONCLUSIVE) exit 0 so a
+# legitimate change is never failed by them, while the documented exit code for
+# the verdict is still recorded in the uploaded Evidence Record.
+#
+# Security note: VerifierLock executes the analysed repository's test code, so
+# this workflow runs on `pull_request` (no access to secrets, no write token)
+# rather than `pull_request_target`.
+
+name: VerifierLock
+
+on:
+  pull_request:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verifierlock-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    name: Test suite
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Install uv (preferred environment builder)
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "0.10.9"
+
+      - name: Install VerifierLock with dev dependencies
+        run: python -m pip install --disable-pip-version-check ".[dev]"
+
+      - name: Run the suite
+        run: python -m pytest -q
+
+  verifier-lock:
+    name: Verifier evidence check (--strict)
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      # Full history: VerifierLock resolves and checks out both revisions.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Install uv (preferred environment builder)
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "0.10.9"
+
+      - name: Install VerifierLock
+        run: python -m pip install --disable-pip-version-check .
+
+      - name: Identify the worktree owner for git
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Run VerifierLock on this pull request
+        run: |
+          verifierlock \
+            --repo . \
+            --base "${{ github.event.pull_request.base.sha }}" \
+            --head "${{ github.event.pull_request.head.sha }}" \
+            --timeout 600 \
+            --strict \
+            --json verifierlock-evidence.json \
+            --report verifierlock-report.txt
+
+      - name: Upload the Evidence Record and report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: verifierlock-evidence
+          path: |
+            verifierlock-evidence.json
+            verifierlock-report.txt
+          if-no-files-found: warn
