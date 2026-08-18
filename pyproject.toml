@@ -9,6 +9,9 @@ dependencies = [
     "coverage>=7.0.0",
 ]
 
+[project.scripts]
+verifierlock = "verifierlock.cli:main"
+
 [project.optional-dependencies]
 dev = [
     "pytest>=8.0.0",

@@ -300,38 +300,38 @@ implementation sub-tasks are never optional.
     - Assert each scenario produces its expected verdict end-to-end.
     - _Requirements: 16.2, 16.3, 16.4, 16.5, 16.6_
 
-- [ ] 18. Wire the CLI, Report_Generator, and exit codes (last)
-  - [ ] 18.1 Implement the Report_Generator
+- [x] 18. Wire the CLI, Report_Generator, and exit codes (last)
+  - [x] 18.1 Implement the Report_Generator
     - Render a local human-readable report with the verdict, per-probe outcomes,
       static findings, and changed-line coverage; write a local artifact and
       contact no remote system.
     - _Requirements: 12.1, 12.2, 14.3_
-  - [ ] 18.2 Implement the CLI with warning, arguments, and exit-code policy
+  - [x] 18.2 Implement the CLI with warning, arguments, and exit-code policy
     - Parse `--repo/--base/--head` plus `--timeout`, `--json`, `--report`,
       `--install-cmd`, and `--strict`; print the untrusted-code warning before
       any probe; map the verdict to the documented distinct exit codes including
       the aborted-no-verdict code; apply the `--strict`/default build-blocking
       policy without changing the documented mapping.
     - _Requirements: 14.1, 14.2, 15.1, 15.2, 15.3, 15.4, 15.5, 15.6, 15.7, 15.8, 15.9_
-  - [ ] 18.3 Implement the optional Explanation_Model
+  - [x] 18.3 Implement the optional Explanation_Model
     - Behind `--explain`, read the finished Evidence Record and emit prose only,
       with no write path into the verdict; produce the verdict and record even
       when no key/network is available.
     - _Requirements: 13.1, 13.2, 13.3_
-  - [ ] 18.4 Write property test for report contents
+  - [x] 18.4 Write property test for report contents
     - **Property 23: Report contains the required elements**
     - **Validates: Requirements 12.1**
-  - [ ] 18.5 Write property test for the exit-code mapping
+  - [x] 18.5 Write property test for the exit-code mapping
     - **Property 24: Verdict-to-exit-code mapping is injective and documented**
     - **Validates: Requirements 15.1, 15.2, 15.3, 15.4, 15.5, 15.6, 15.7, 15.8, 15.9**
-  - [ ] 18.6 Write property test for the pytest exit-code-2 abort path
+  - [x] 18.6 Write property test for the pytest exit-code-2 abort path
     - **Property 20: pytest exit code 2 aborts with no verdict**
     - **Validates: Requirements 8.4, 15.9**
-  - [ ] 18.7 Write the end-to-end fixture demo integration test
+  - [x] 18.7 Write the end-to-end fixture demo integration test
     - Run the CLI against the non-discriminating weakened-test fixture and assert
       it produces VERIFIER_WEAKENED with the documented exit code.
     - _Requirements: 16.2, 16.6_
-  - [ ] 18.8 Write the LLM-isolation test for the optional Explanation_Model
+  - [x] 18.8 Write the LLM-isolation test for the optional Explanation_Model
     - Assert the verdict and the reproducible core are byte-identical with
       `--explain` on and off; mutating or enabling the explanation output can
       never change the verdict or the reproducible core. This validates the
